@@ -5,7 +5,7 @@ mutable struct Cluster
     sigma::Float64
     epsilon::Float64
     size::Int64  #number of particles
-    length::Int64 #length of box, spans -length to length
+    length::Float64 #length of box, spans -length to length
     element::String
     x::Array{Float64}
     y::Array{Float64}
@@ -18,12 +18,26 @@ mutable struct Cluster
     fz::Array{Float64}
 end
 
-function generateCluster(mass,sigma,epsilon,n,length,element)
+function generateCluster(mass,sigma,epsilon,n,element)
+    pps = ceil(n^(1/3)) #number of particles per side of initial structure
+    length = pps*3.3333
     cluster = Cluster(mass,sigma,epsilon,n,length,element,zeros(Float64, n),zeros(Float64, n),zeros(Float64, n),zeros(Float64, n),zeros(Float64, n),zeros(Float64, n),zeros(Float64, n),zeros(Float64, n),zeros(Float64, n))
-    for i in 1:n
-        cluster.x[i] = length*(2*rand()-1)
-        cluster.y[i] = length*(2*rand()-1)
-        cluster.z[i] = length*(2*rand()-1)
+    pps = ceil(n^(1/3))
+    i = 1
+    for l in 1:pps
+        for j in 1:pps
+            for k in 1:pps
+                if i <= n
+                    cluster.x[i] = l*sigma*1.15
+                    cluster.y[i] = j*sigma*1.15
+                    cluster.z[i] = k*sigma*1.15
+                    cluster.vx[i] = randn()
+                    cluster.vy[i] = randn()
+                    cluster.vz[i] = randn()
+                    i+=1
+                end
+            end
+        end
     end
     return cluster
 end
