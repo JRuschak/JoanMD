@@ -35,13 +35,28 @@ function step(cluster::Cluster, dt::Float64)
         cluster.x[i] += cluster.vx[i]*dt
         cluster.y[i] += cluster.vy[i]*dt
         cluster.z[i] += cluster.vz[i]*dt
-        if cluster.x[i] > boundary || cluster.x[i] < -boundary
+        if cluster.x[i] > boundary
+            cluster.x[i] = boundary
             cluster.vx[i] *= -1
         end
-        if cluster.y[i] > boundary || cluster.y[i] < -boundary
+        if cluster.x[i] < -boundary
+            cluster.x[i] = -boundary
+            cluster.vx[i] *= -1
+        end
+        if cluster.y[i] > boundary
+            cluster.y[i] = boundary
             cluster.vy[i] *= -1
         end
-        if cluster.z[i] > boundary || cluster.z[i] < -boundary
+        if cluster.y[i] < -boundary
+            cluster.y[i] = -boundary
+            cluster.vy[i] *= -1
+        end
+        if cluster.z[i] > boundary
+            cluster.z[i] = boundary
+            cluster.vz[i] *= -1
+        end
+        if cluster.z[i] < -boundary
+            cluster.z[i] = -boundary
             cluster.vz[i] *= -1
         end
         cluster.fx[i] = 0

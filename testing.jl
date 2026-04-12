@@ -15,8 +15,6 @@ for i in 1:timestops
     step(cluster,dt)
     if i%checkpoint == 0
         thermometer(cluster,temp)
-        com(cluster)
-        cov(cluster)
     end
 end
 println(pot_lj(cluster))

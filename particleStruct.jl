@@ -18,6 +18,29 @@ mutable struct Cluster
     fz::Array{Float64}
 end
 
+function com(cluster)
+    xavg = mean(cluster.x)
+    yavg = mean(cluster.y)
+    zavg = mean(cluster.z)
+    for i in 1:cluster.size
+        cluster.x[i] -= xavg
+        cluster.y[i] -= yavg
+        cluster.z[i] -= zavg
+    end
+end
+
+function cov(cluster)
+    vxavg = mean(cluster.vx)
+    vyavg = mean(cluster.vy)
+    vzavg = mean(cluster.vz)
+    for i in 1:cluster.size
+        cluster.vx[i] -= vxavg
+        cluster.vy[i] -= vyavg
+        cluster.vz[i] -= vzavg
+    end
+end
+
+
 function generateCluster(mass,sigma,epsilon,n,element)
     pps = ceil(n^(1/3)) #number of particles per side of initial structure
     length = pps*3.3333
@@ -39,27 +62,7 @@ function generateCluster(mass,sigma,epsilon,n,element)
             end
         end
     end
+    com(cluster)
+    cov(cluster)
     return cluster
-end
-
-function com(cluster)
-    xavg = mean(cluster.x)
-    yavg = mean(cluster.y)
-    zavg = mean(cluster.z)
-    for i in 1:cluster.size
-        cluster.x[i] -= xavg
-        cluster.y[i] -= yavg
-        cluster.z[i] -= zavg
-    end
-end
-
-function cov(cluster)
-    vxavg = mean(cluster.vx)
-    vyavg = mean(cluster.vy)
-    vzavg = mean(cluster.vz)
-    for i in 1:cluster.size
-        cluster.vx[i] -= vxavg
-        cluster.vy[i] -= vyavg
-        cluster.vz[i] -= vzavg
-    end
 end
