@@ -20,3 +20,15 @@ function pot_lj(cluster)
     end
     return pot_eng
 end
+
+function kin_energy(cluster)
+    kinetic = 0
+    for i in 1:cluster.size
+        kinetic += 0.5*cluster.mass*(cluster.vx*cluster.vx+cluster.vy*cluster.vy+cluster.vz*cluster.vz)
+    end
+    return kinetic
+end
+
+function total_energy(cluster)
+    return kin_energy(cluster)+pot_lj(cluster)
+end

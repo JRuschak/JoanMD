@@ -88,3 +88,82 @@ function thermometer(cluster::Cluster, temp::Float64)
         cluster.vz[i] *= scale
     end
 end
+
+function fire_step(cluster::Cluster, dt::Float64,alpha_start::Float64,alpha::Float64,npos::Int64)
+    for i in 1:cluster.size
+        cluster.vx[i] += 0.5*cluster.fx[i]*dt
+        cluster.vy[i] += 0.5*cluster.fy[i]*dt
+        cluster.vz[i] += 0.5*cluster.fz[i]*dt
+    end
+    boundary = cluster.length
+    for i in 1:cluster.size
+        cluster.x[i] += cluster.vx[i]*dt
+        cluster.y[i] += cluster.vy[i]*dt
+        cluster.z[i] += cluster.vz[i]*dt
+        if cluster.x[i] > boundary
+            cluster.x[i] = boundary
+            cluster.vx[i] *= -1
+        end
+        if cluster.x[i] < -boundary
+            cluster.x[i] = -boundary
+            cluster.vx[i] *= -1
+        end
+        if cluster.y[i] > boundary
+            cluster.y[i] = boundary
+            cluster.vy[i] *= -1
+        end
+        if cluster.y[i] < -boundary
+            cluster.y[i] = -boundary
+            cluster.vy[i] *= -1
+        end
+        if cluster.z[i] > boundary
+            cluster.z[i] = boundary
+            cluster.vz[i] *= -1
+        end
+        if cluster.z[i] < -boundary
+            cluster.z[i] = -boundary
+            cluster.vz[i] *= -1
+        end
+        cluster.fx[i] = 0
+        cluster.fy[i] = 0
+        cluster.fz[i] = 0
+    end
+    calc_all_forces(cluster)
+    for i in 1:cluster.size
+        cluster.vx[i] += 0.5*cluster.fx[i]*dt
+        cluster.vy[i] += 0.5*cluster.fy[i]*dt
+        cluster.vz[i] += 0.5*cluster.fz[i]*dt
+    end
+    p=0.0
+    f_mag2=0.0
+    v_mag2=0.0
+    for i in 1:cluster.size
+        p += cluster.vx[i]*cluster.fx[i] + cluster.vy[i]*cluster.fy[i] + cluster.vz[i]*cluster.fz[i]
+        f_mag2 += cluster.fx[i]^2+cluster.fy[i]^2+cluster.fz[i]^2
+        v_mag2 += cluster.vx[i]^2+cluster.vy[i]^2+cluster.vz[i]^2
+    end
+    f_mag = sqrt(f_mag2)
+    v_mag = sqrt(v_mag2)
+    if p > 0.0 && f_mag > 1e-12 && v_mag > 1e-12
+        for i in 1:cluster.size
+            cluster.vx[i] = (1-alpha)*cluster.vx[i]+alpha*cluster.fx[i]*(v_mag/f_mag)    
+            cluster.vy[i] = (1-alpha)*cluster.vy[i]+alpha*cluster.fy[i]*(v_mag/f_mag)
+            cluster.vz[i] = (1-alpha)*cluster.vz[i]+alpha*cluster.fz[i]*(v_mag/f_mag)
+        end
+        alpha*= .99
+        npos+=1
+        if npos > 4
+            dt = min(dt * 1.1, 0.005)
+        end
+    elseif p < 0.0
+        for i in 1:cluster.size
+            cluster.vx[i] = 0
+            cluster.vy[i] = 0
+            cluster.vz[i] = 0
+        end
+        alpha = alpha_start
+        dt = max(dt * 0.5, 1e-6)
+        n_pos = 0
+    end
+    return alpha, dt, npos
+end
