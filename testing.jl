@@ -14,6 +14,13 @@ checkpoint = timestops/checks
 temp::Float64 = 1
 alpha_start = 0.1
 alpha=0.1
+
+for i in 1:timestops
+    step(cluster,dt)
+    if i%checkpoint == 0
+        thermometer(cluster,temp)
+    end
+end
 for i in 1:timestops
     #step(cluster,dt)
     global alpha, dt, npos
@@ -22,7 +29,5 @@ for i in 1:timestops
         thermometer(cluster,temp)
     end
 end
-println(pot_lj(cluster))
-println(cluster.vx)
-write_xyz(cluster)
-
+println(pot_lj(cluster))#this layout most of the time produces the lowest possible energy
+#write_xyz(cluster)
